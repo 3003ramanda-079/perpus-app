@@ -5,6 +5,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import Sidebar from '@/Components/Sidebar.vue'; // <-- Ditambahkan dari Langkah 10
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
@@ -179,20 +180,27 @@ const showingNavigationDropdown = ref(false);
                 </div>
             </nav>
 
-            <!-- Page Heading -->
-            <header
-                class="bg-white shadow"
-                v-if="$slots.header"
-            >
-                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <slot name="header" />
-                </div>
-            </header>
+            <!-- Layout Pembungkus Flexbox dengan Sidebar (Langkah 10) -->
+            <div class="flex">
+                <Sidebar />
+                
+                <div class="flex-1">
+                    <!-- Page Heading -->
+                    <header
+                        class="bg-white shadow"
+                        v-if="$slots.header"
+                    >
+                        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                            <slot name="header" />
+                        </div>
+                    </header>
 
-            <!-- Page Content -->
-            <main>
-                <slot />
-            </main>
+                    <!-- Page Content -->
+                    <main>
+                        <slot />
+                    </main>
+                </div>
+            </div>
         </div>
     </div>
 </template>
