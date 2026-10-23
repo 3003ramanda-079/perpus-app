@@ -20,4 +20,4 @@ protected $fillable = [
  {
  return $this->belongsTo(Member::class);
  }
-}
+}php artisan migrate 
