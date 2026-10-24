@@ -7,26 +7,26 @@ use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil seluruh data buku, diurutkan dari yang terbaru, dibagi per 10 data (paginasi)
-        $books = Book::latest()->paginate(10);
+        $books = Book::when($request->search, function ($query, $search) {
+            $query->where('judul', 'like', "%{$search}%")
+                  ->orWhere('pengarang', 'like', "%{$search}%");
+        })->latest()->paginate(10)->withQueryString();
 
-        // Mengirim data $books ke halaman Vue bernama Books/Index
         return inertia('Books/Index', [
-            'books' => $books,
+            'books'  => $books,
+            'search' => $request->search,
         ]);
     }
 
     public function create()
     {
-        // Sama seperti index(), nama halaman cukup 'Books/Create' tanpa .vue
         return inertia('Books/Create');
     }
 
     public function store(Request $request)
     {
-        // 1. Validasi data yang dikirim dari form
         $validated = $request->validate([
             'kode_buku' => 'required|unique:books',
             'judul'     => 'required|max:255',
@@ -36,10 +36,8 @@ class BookController extends Controller
             'stok'      => 'required|integer|min:0',
         ]);
 
-        // 2. Jika seluruh data valid, simpan sebagai baris baru di tabel books
         Book::create($validated);
 
-        // 3. Arahkan kembali ke halaman daftar buku, sertakan pesan sukses
         return redirect()->route('books.index')->with('success', 'Buku berhasil ditambahkan');
     }
 
@@ -50,16 +48,31 @@ class BookController extends Controller
 
     public function edit(Book $book)
     {
-        //
+        return inertia('Books/Edit', [
+            'book' => $book,
+        ]);
     }
 
     public function update(Request $request, Book $book)
     {
-        //
+        $validated = $request->validate([
+            'kode_buku' => 'required|unique:books,kode_buku,' . $book->id,
+            'judul'     => 'required|max:255',
+            'pengarang' => 'required|max:255',
+            'penerbit'  => 'nullable|max:255',
+            'tahun'     => 'nullable|digits:4',
+            'stok'      => 'required|integer|min:0',
+        ]);
+
+        $book->update($validated);
+
+        return redirect()->route('books.index')->with('success', 'Buku berhasil diperbarui');
     }
 
     public function destroy(Book $book)
     {
-        //
+        $book->delete();
+
+        return redirect()->route('books.index')->with('success', 'Buku berhasil dihapus');
     }
 }
